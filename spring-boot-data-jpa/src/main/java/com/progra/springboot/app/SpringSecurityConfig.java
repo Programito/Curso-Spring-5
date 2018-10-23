@@ -10,9 +10,16 @@ import org.springframework.security.core.userdetails.User.UserBuilder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.progra.springboot.app.auth.handler.LoginSuccesHandler;
+
+
+
 @Configuration
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	
+	// hay que poner como component el LoginSuccessHandler
+	@Autowired
+	private LoginSuccesHandler successHandler;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -24,10 +31,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/factura/**").hasAnyRole("ADMIN")
 		.anyRequest().authenticated()
 		.and()
-	    	.formLogin().loginPage("/login")
+	    	.formLogin()
+	    		.successHandler(successHandler)
+	    		.loginPage("/login")
 	    	.permitAll()
 	    .and()
-	    .logout().permitAll();
+	    .logout().permitAll()
+	    .and()
+	    .exceptionHandling().accessDeniedPage("/error_403");
 	}
 
 	@Autowired

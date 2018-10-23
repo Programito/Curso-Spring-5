@@ -1,6 +1,9 @@
 package com.progra.springboot.app.controllers;
 
 
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 // cuando tienes varias implemenaciones y las nombras
@@ -9,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -51,6 +56,8 @@ public class ClienteController {
 //	@Qualifier("clienteDaoJPA")
 //	private IClienteService clienteService;
 
+	protected final Log logger= LogFactory.getLog(this.getClass());
+	
 	@Autowired
 	private IClienteService clienteService;
 
@@ -88,13 +95,21 @@ public class ClienteController {
 	}
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String vacio(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
-		return listar(page,model);
+	public String vacio(@RequestParam(name = "page", defaultValue = "0") int page, Model model,Authentication authentication) {
+		return listar(page,model,authentication);
 	}
 
 	@RequestMapping(value = "/listar", method = RequestMethod.GET)
-	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
+	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, Model model, Authentication authentication) {
 
+		if(authentication!=null) {
+			logger.info("Hola usuario autentificado, tu username es: ".concat(authentication.getName()));
+		}
+		
+		Authentication auth= SecurityContextHolder.getContext().getAuthentication();
+		if(auth!=null) {
+			logger.info("Utilizando forma estatica SecurityContextHolder.getContext().getAuthentication(): Usuario autentificado, username es: ".concat(auth.getName()));
+		}
 		Pageable pageRequest = PageRequest.of(page, 5);
 		Page<Cliente> clientes = clienteService.findAll(pageRequest);
 
