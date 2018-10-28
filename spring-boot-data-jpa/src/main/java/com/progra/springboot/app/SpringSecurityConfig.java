@@ -15,6 +15,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.progra.springboot.app.auth.handler.LoginSuccesHandler;
+import com.progra.springboot.app.models.service.JpaUserDetailsService;
 
 // para poder utilizar anotaciones en controladores
 @EnableGlobalMethodSecurity(securedEnabled=true, prePostEnabled=true)
@@ -29,7 +30,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	private DataSource dataSource;
 	
 	@Autowired
+	private JpaUserDetailsService userDetaisService;
+	
+	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
+	
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -59,11 +64,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //		build.inMemoryAuthentication()
 //			.withUser(users.username("admin").password("12345").roles("ADMIN","USER"))
 //			.withUser(users.username("andres").password("12345").roles("USER"));
-	
+
+	//jdbc config
 	build.jdbcAuthentication()
 		.dataSource(dataSource)
 		.passwordEncoder(passwordEncoder)
 		.usersByUsernameQuery("select username, password, enabled from users where username=?")
 		.authoritiesByUsernameQuery("select u.username, a.authority from authorities a inner join users u on (a.user_id=u.id) where u.username=?");
+		
+		
+//		build.userDetailsService(userDetaisService)
+//		.passwordEncoder(passwordEncoder);
 	}
 }
