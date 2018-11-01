@@ -5,6 +5,7 @@ package com.progra.springboot.app.controllers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 // cuando tienes varias implemenaciones y las nombras
 // import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,6 +73,10 @@ public class ClienteController {
 
 	@Autowired
 	private IUploadFileService uploadFileService;
+	
+	//messages_properties
+	@Autowired
+	private MessageSource messageSource;
 	
 	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	// .+ para poner la extension
@@ -106,13 +112,14 @@ public class ClienteController {
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String vacio(@RequestParam(name = "page", defaultValue = "0") int page, Model model,Authentication authentication, HttpServletRequest request) {
-		return listar(page,model,authentication, request);
+	public String vacio(@RequestParam(name = "page", defaultValue = "0") int page, Model model,Authentication authentication, HttpServletRequest request,Locale locale) {
+		return listar(page,model,authentication, request,locale);
 	}
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "/listar", method = RequestMethod.GET)
-	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, Model model, Authentication authentication, HttpServletRequest request) {
+	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, Model model, Authentication authentication, HttpServletRequest request,
+			 Locale locale ) {
 
 		if(authentication!=null) {
 			logger.info("Hola usuario autentificado, tu username es: ".concat(authentication.getName()));
@@ -151,8 +158,8 @@ public class ClienteController {
 
 		PageRender<Cliente> pageRender = new PageRender<>("/listar", clientes);
 
-		model.addAttribute("titulo", "Listado de clientes");
-		model.addAttribute("clientes", clienteService.findAll());
+		model.addAttribute("titulo", messageSource.getMessage("text.cliente.listar.titulo",null,locale));
+		model.addAttribute("clientes", clientes);
 
 		model.addAttribute("page", pageRender);
 		return "listar";
